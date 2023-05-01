@@ -52,8 +52,24 @@ router.post('/', async (req, res, next) => {
 router.put('/:id', async (req, res, send) => {
   try {
     const {id} = req.params;
-    const {amt} = req.body;
-    const results = await db.query(`UPDATE invoices SET amt = $1 WHERE id = $2 RETURNING id, comp_code, amt, paid, add_date, paid_date`, [amt, id]);
+    const {amt, paid} = req.body;
+    let paidDate;
+    
+    const currStatus = await db.query(`SELECT paid_date FROM invoices WHERE id = $1`, [id]);
+    if (currStatus.rows.length === 0){
+      throw new ExpressError(`Can't find invoice with id: ${id}`, 404)
+    }
+
+    const currPaidDate = currStatus.rows[0].paid_date;
+    if(!currPaidDate && paid){
+      paidDate = new Date();
+    } else if(!paid){
+      paidDate = null;
+    } else {
+      paidDate = currPaidDate;
+    }
+
+    const results = await db.query(`UPDATE invoices SET amt = $1, paid = $4, paid_date = $3 WHERE id = $2 RETURNING id, comp_code, amt, paid, add_date, paid_date`, [amt, id, paidDate, paid]);
     if(results.rows.length === 0){
       throw new ExpressError(`Can't find invoice with id: ${id}`, 404);
     }
@@ -75,10 +91,6 @@ router.delete('/:id', async (req, res, send) => {
       return next(e)
   }
 })
-
-
-//get('/:code') update
-
 
 
 module.exports = router;
