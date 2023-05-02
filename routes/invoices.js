@@ -49,7 +49,7 @@ router.post('/', async (req, res, next) => {
   }
 })
 
-router.put('/:id', async (req, res, send) => {
+router.put('/:id', async (req, res, next) => {
   try {
     const {id} = req.params;
     const {amt, paid} = req.body;
