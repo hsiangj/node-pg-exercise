@@ -9,9 +9,13 @@ const ExpressError = require("./expressError")
 app.use(express.json());
 
 const coRoutes = require('./routes/companies');
-app.use("/companies", coRoutes);
 const invRoutes = require('./routes/invoices');
+const indRoutes = require('./routes/industries');
+
+app.use("/companies", coRoutes);
 app.use("/invoices", invRoutes);
+app.use("/industries", indRoutes);
+
 /** 404 handler */
 
 app.use(function(req, res, next) {
